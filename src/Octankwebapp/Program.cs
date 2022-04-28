@@ -28,13 +28,13 @@ namespace Octankwebapp
 
                 // Uncomment the next block if you know exactly what Account and Region you
                 // want to deploy the stack to.
-                /*
+                
                 Env = new Amazon.CDK.Environment
                 {
-                    Account = "123456789012",
-                    Region = "us-east-1",
+                    Account = "808754908315",
+                    Region = "ap-southeast-2",
                 }
-                */
+                
 
                 // For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
             });
