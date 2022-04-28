@@ -10,7 +10,7 @@ namespace Octankwebapp
         public static void Main(string[] args)
         {
             var app = new App();
-            new OctankwebappStack(app, "OctankwebappStack", new StackProps
+            new OctankPipeline(app, "OctankPipeline", new StackProps
             {
                 // If you don't specify 'env', this stack will be environment-agnostic.
                 // Account/Region-dependent features and context lookups will not work,

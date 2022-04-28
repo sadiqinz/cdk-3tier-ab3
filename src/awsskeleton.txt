@@ -1,0 +1,49 @@
+*** Create Code Commit Repository ****
+aws codecommit create-repository --repository-name MyDemoRepo --repository-description "My demonstration repository" --tags Team=Saanvi
+
+*** Create user to be used for code commit **
+aws iam create-user --user-name abcodecommit
+
+*** Code Commit Policy for user **
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:ListRepositoriesForApprovalRuleTemplate",
+                "codecommit:CreateApprovalRuleTemplate",
+                "codecommit:UpdateApprovalRuleTemplateName",
+                "codecommit:GetApprovalRuleTemplate",
+                "codecommit:ListApprovalRuleTemplates",
+                "codecommit:DeleteApprovalRuleTemplate",
+                "codecommit:ListRepositories",
+                "codecommit:UpdateApprovalRuleTemplateContent",
+                "codecommit:UpdateApprovalRuleTemplateDescription"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "codecommit:*",
+            "Resource": "arn:aws:codecommit:ap-southeast-2:972552287170:ABTraining"
+        },
+        {
+            "Sid": "VisualEditor2",
+            "Effect": "Deny",
+            "Action": "codecommit:DeleteRepository",
+            "Resource": "arn:aws:codecommit:ap-southeast-1:972552287170:ABTraining"
+        }
+    ]
+}
+
+**** Create S3 Bucket to hold artifacts for startup server and upload files ****
+aws s3api create-bucket --bucket octankwebapp-artifacts-bucket --region ap-southeast-2 --create-bucket-configuration LocationConstraint=ap-southeast-2
+aws s3api put-object --bucket octankwebapp-artifacts-bucket --key dbinfo.inc --body ./src/dbinfo.inc
+aws s3api put-object --bucket octankwebapp-artifacts-bucket --key bootstrapserver.py --body ./src/Abtraining/lib/bootstrapserver.py
+aws s3api put-object --bucket octankwebapp-artifacts-bucket --key SamplePage.php --body SamplePage.php
+
+
+
