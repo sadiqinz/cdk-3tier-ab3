@@ -11,7 +11,7 @@ namespace Octankwebapp
         {            
             // Define the repository
             string reponame = "arn:aws:codecommit:ap-southeast-2:808754908315:OctankWebRepo";
-            
+
             //Create Pipeline with correct repository
             var pipeline = new CodePipeline(this, "pipeline", new CodePipelineProps
             {
@@ -22,6 +22,11 @@ namespace Octankwebapp
                     Commands = new string[] { "npm install -g aws-cdk", "cdk synth" }
                 })
             });
+
+            //Create Octankwebapp Pipeline Stage
+            pipeline.AddStage(new OctankPipelineAppStage(this, "OctankWebAppStage", new StageProps{
+                Env = new Environment()                
+            }));
         }
     }
 }

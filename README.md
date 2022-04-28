@@ -12,3 +12,10 @@ It uses the [.NET Core CLI](https://docs.microsoft.com/dotnet/articles/core/) to
 * `cdk deploy`       deploy this stack to your default AWS account/region
 * `cdk diff`         compare deployed stack with current state
 * `cdk synth`        emits the synthesized CloudFormation template
+
+
+# Steps to follow
+1. Create an IAM user to be used for CodeCommit
+2. Create CodeCommit repository
+3. Create EC2 Instance KMS Key for access to server if required
+4. Specify Secret Manager's ARN in startup script
