@@ -19,7 +19,7 @@ namespace Octankwebapp
         internal OctankwebappStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
             // Create certificate listener
-            ListenerCertificate mylistener = new ListenerCertificate("arn:aws:acm:ap-southeast-2:972552287170:certificate/59481c7e-96a1-4c1e-a7b5-3313868138f4");
+            ListenerCertificate mylistener = new ListenerCertificate("arn:aws:acm:ap-southeast-2:808754908315:certificate/094adde5-dd39-492b-8308-31e3cd1ece29");
             
             // S3 bucket with existing artifacts - This would be created outside the stack
             var artifactBucket = Bucket.FromBucketName(this, "ArtifactBucket", "octankwebapp-artifacts-bucket");
