@@ -2,6 +2,7 @@ using Amazon.CDK;
 using Amazon.CDK.AWS.EC2;
 using Constructs;
 
+
 namespace Octankwebapp
 {
     public class NetworkSetup : Construct
@@ -13,7 +14,12 @@ namespace Octankwebapp
             abVpc = new Vpc(this, "prodVPC", new VpcProps{
                 Cidr = "10.1.0.0/16",
                 NatGateways = 1
-            });            
+            });      
+
+            //Create Code Deploy VPC endpoint
+            abVpc.AddInterfaceEndpoint("CodeDeployEndPoint", new InterfaceVpcEndpointOptions{
+                Service = InterfaceVpcEndpointAwsService.CODEBUILD
+            });
         }
     }
 }

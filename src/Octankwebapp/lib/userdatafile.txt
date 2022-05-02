@@ -2,6 +2,15 @@ sudo yum update -y
 sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
 cat /etc/system-release
 sudo yum install -y httpd
+sudo yum install ruby
+sudo yum install wget
+cd /home/ec2-user
+wget https://aws-codedeploy-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+sudo service codedeploy-agent status
+sudo service codedeploy-agent start
+sudo service codedeploy-agent status
 sudo systemctl start httpd
 sudo systemctl enable httpd
 sudo cd /var/www/html/
@@ -17,8 +26,8 @@ sudo cat << EOF > index.html
 </html>
 EOF
 sudo touch /var/www/html/index.html
-sudo mkdir /var/www/inc
-sudo pip3 install boto3
+#sudo mkdir /var/www/inc
+#sudo pip3 install boto3
 #sudo aws s3 cp s3://abtraining-s3-bucket-1234/dbinfo.inc /var/www/inc/dbinfo.inc
 #sudo aws s3 cp s3://abtraining-s3-bucket-1234/bootstrapserver.py /var/www/inc/bootstrapserver.py
 #sudo aws s3 cp s3://abtraining-s3-bucket-1234/SamplePage.php /var/www/html/SamplePage.php

@@ -41,6 +41,9 @@ aws iam create-user --user-name abcodecommit
 
 **** Create S3 Bucket to hold artifacts for startup server and upload files ****
 aws s3api create-bucket --bucket octankwebapp-artifacts-bucket --region ap-southeast-2 --create-bucket-configuration LocationConstraint=ap-southeast-2
+**** Create S3 Bucket to hold code for Shoed app
+aws s3api create-bucket --bucket octankwebapp-codepipeline-shoes-bucket --region ap-southeast-2 --create-bucket-configuration LocationConstraint=ap-southeast-2
+
 aws s3api put-object --bucket octankwebapp-artifacts-bucket --key dbinfo.inc --body ./src/dbinfo.inc
 aws s3api put-object --bucket octankwebapp-artifacts-bucket --key bootstrapserver.py --body ./src/Abtraining/lib/bootstrapserver.py
 aws s3api put-object --bucket octankwebapp-artifacts-bucket --key SamplePage.php --body SamplePage.php

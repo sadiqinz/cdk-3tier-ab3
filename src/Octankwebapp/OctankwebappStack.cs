@@ -23,6 +23,10 @@ namespace Octankwebapp
             
             // S3 bucket with existing artifacts - This would be created outside the stack
             var artifactBucket = Bucket.FromBucketName(this, "ArtifactBucket", "octankwebapp-artifacts-bucket");
+
+            // S3 bucket for CodePipeline Code
+            var codePipelineBucket = Bucket.FromBucketName(this, "CodePipeLineBucket", "octankwebapp-codepipeline-shoes-bucket");
+            
             
             // IAM role for our Web instance
             var webInstanceRole = new Role(this, "instancerole", new RoleProps{
@@ -32,6 +36,14 @@ namespace Octankwebapp
             
             // Grant access to S3 artifact bucket
             artifactBucket.GrantRead(webInstanceRole);
+            codePipelineBucket.GrantRead(webInstanceRole);
+            // Grant access to Codebuild Buckets
+            webInstanceRole.AttachInlinePolicy(new Policy(this, "userpool-policy", new PolicyProps {
+                Statements = new [] { new PolicyStatement(new PolicyStatementProps {
+                    Actions = new [] { "s3.Get*", "s3.List*" },
+                    Resources = new [] { "arn:aws:s3:::aws-codedeploy-ap-southeast-2/*" }
+                }) }
+            }));
 
             //Create base VPC
             var baseNetwork = new NetworkSetup(this, "NetworkSetupAU");                        
