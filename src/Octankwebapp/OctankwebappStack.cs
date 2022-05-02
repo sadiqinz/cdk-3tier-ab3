@@ -40,7 +40,7 @@ namespace Octankwebapp
             // Grant access to Codebuild Buckets
             webInstanceRole.AttachInlinePolicy(new Policy(this, "userpool-policy", new PolicyProps {
                 Statements = new [] { new PolicyStatement(new PolicyStatementProps {
-                    Actions = new [] { "s3.Get*", "s3.List*" },
+                    Actions = new [] { "s3:Get*", "s3:List*" },
                     Resources = new [] { "arn:aws:s3:::aws-codedeploy-ap-southeast-2/*" }
                 }) }
             }));
