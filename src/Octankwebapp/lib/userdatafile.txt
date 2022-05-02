@@ -4,12 +4,24 @@ cat /etc/system-release
 sudo yum install -y httpd
 sudo systemctl start httpd
 sudo systemctl enable httpd
+sudo cd /var/www/html/
+sudo cat << EOF > index.html
+<!doctype html>
+<html>
+  <head>
+    <title>Octank Footwear WebApp!</title>
+  </head>
+  <body>
+    <p>This is a sample page and will be replaced with actual application</p>
+  </body>
+</html>
+EOF
 sudo touch /var/www/html/index.html
 sudo mkdir /var/www/inc
 sudo pip3 install boto3
-sudo aws s3 cp s3://abtraining-s3-bucket-1234/dbinfo.inc /var/www/inc/dbinfo.inc
-sudo aws s3 cp s3://abtraining-s3-bucket-1234/bootstrapserver.py /var/www/inc/bootstrapserver.py
-sudo aws s3 cp s3://abtraining-s3-bucket-1234/SamplePage.php /var/www/html/SamplePage.php
-sudo cd /var/www/inc
-sudo chmod a+x /var/www/inc/bootstrapserver.py
-sudo python3 /var/www/inc/bootstrapserver.py
+#sudo aws s3 cp s3://abtraining-s3-bucket-1234/dbinfo.inc /var/www/inc/dbinfo.inc
+#sudo aws s3 cp s3://abtraining-s3-bucket-1234/bootstrapserver.py /var/www/inc/bootstrapserver.py
+#sudo aws s3 cp s3://abtraining-s3-bucket-1234/SamplePage.php /var/www/html/SamplePage.php
+#sudo cd /var/www/inc
+#sudo chmod a+x /var/www/inc/bootstrapserver.py
+#sudo python3 /var/www/inc/bootstrapserver.py

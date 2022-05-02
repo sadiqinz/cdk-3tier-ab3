@@ -93,7 +93,7 @@ namespace Octankwebapp
             //Create required DB
             DatabaseInstance dbInstance = new DatabaseInstance(this, "SingleDBInstnace", new DatabaseInstanceProps{
                 Engine = DatabaseInstanceEngine.Mysql(new MySqlInstanceEngineProps{ Version = MysqlEngineVersion.VER_8_0_20}),
-                DatabaseName = "mysqldb",
+                DatabaseName = "shoes_db",
                 Vpc = baseNetwork.abVpc,
                 VpcSubnets = new SubnetSelection{
                     SubnetType = SubnetType.PRIVATE_WITH_NAT
