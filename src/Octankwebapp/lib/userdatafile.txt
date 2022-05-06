@@ -14,7 +14,7 @@ sudo service codedeploy-agent status
 sudo systemctl start httpd
 sudo systemctl enable httpd
 sudo cd /var/www/html/
-sudo cat << EOF > index.html
+sudo bash -c "cat << EOF > index.html
 <!doctype html>
 <html>
   <head>
@@ -25,7 +25,8 @@ sudo cat << EOF > index.html
   </body>
 </html>
 EOF
-sudo touch /var/www/html/index.html
+"
+#sudo touch /var/www/html/index.html
 #sudo mkdir /var/www/inc
 #sudo pip3 install boto3
 #sudo aws s3 cp s3://abtraining-s3-bucket-1234/dbinfo.inc /var/www/inc/dbinfo.inc
