@@ -1,10 +1,13 @@
+echo "Starting Yum Update to see what is happening"
+read -t 10 -p "I am going to wait for 10 seconds only ..."
+echo "After Pause command"
 sudo yum update -y
+echo "After Yum update"
 sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
-cat /etc/system-release
 sudo yum install -y httpd
-sudo yum install ruby
-sudo yum install wget
-cd /home/ec2-user
+sudo yum install -y ruby
+sudo yum install -y wget
+cd /tmp
 wget https://aws-codedeploy-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/latest/install
 chmod +x ./install
 sudo ./install auto
@@ -13,7 +16,7 @@ sudo service codedeploy-agent start
 sudo service codedeploy-agent status
 sudo systemctl start httpd
 sudo systemctl enable httpd
-sudo cd /var/www/html/
+cd /var/www/html
 sudo bash -c "cat << EOF > index.html
 <!doctype html>
 <html>
