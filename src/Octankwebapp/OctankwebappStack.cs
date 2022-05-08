@@ -104,7 +104,7 @@ namespace Octankwebapp
             //Console.WriteLine("[{0}]", string.Join(", ", userdata));
 
             //{"sudo yum update -y", "sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2", "cat /etc/system-release", "sudo yum install -y httpd", "sudo systemctl start httpd" ,"sudo systemctl enable httpd", "sudo touch /var/www/html/index.html"};
-            //asg.AddUserData(userdata);
+            asg.AddUserData(userdata);
 
             //Create DB Security group
             SecurityGroup dbsecGroup = new SecurityGroup(this, "dbsecuritygroup", new SecurityGroupProps{
