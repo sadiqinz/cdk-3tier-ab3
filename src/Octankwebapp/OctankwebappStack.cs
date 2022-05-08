@@ -69,9 +69,16 @@ namespace Octankwebapp
             //Create a load balancer without any targets     
             ApplicationLoadBalancer lb = new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancer (this, "ExtLoadBalancer", new ApplicationLoadBalancerProps {
                     Vpc = baseNetwork.abVpc,
-                    InternetFacing = true
+                    InternetFacing = true, 
             });
 
+            // Target group with duration-based stickiness with load-balancer generated cookie
+            ApplicationTargetGroup tg1 = new ApplicationTargetGroup(this, "TG1", new ApplicationTargetGroupProps {
+                TargetType = TargetType.INSTANCE,
+                Port = 80,
+                StickinessCookieDuration = Duration.Minutes(5),
+                Vpc = baseNetwork.abVpc
+            });
             //Add a default listener to this lb
             ApplicationListener listener = lb.AddListener("ListenerHttp", new BaseApplicationListenerProps {
                 Port = 443,
@@ -79,12 +86,13 @@ namespace Octankwebapp
                 Certificates = new [] {mylistener}
             });
 
-            //Add Targets to Listener
-            listener.AddTargets("Target", new AddApplicationTargetsProps{
-                Port = 80,
-                Targets = new IApplicationLoadBalancerTarget[] {asg}
+            //Add TargetGroup to listener
+            tg1.RegisterListener(listener);
+            listener.AddAction("listerntg", new AddApplicationActionProps {
+                Action = ListenerAction.Forward(new IApplicationTargetGroup[] {tg1})
             });
-
+            //Attache ASG to load balancer
+            asg.AttachToApplicationTargetGroup(tg1);
             //Setup ASG's scaling properties
             asg.ScaleOnRequestCount("ReasonableLoad", new RequestCountScalingProps{
                 TargetRequestsPerMinute =60
@@ -96,7 +104,7 @@ namespace Octankwebapp
             //Console.WriteLine("[{0}]", string.Join(", ", userdata));
 
             //{"sudo yum update -y", "sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2", "cat /etc/system-release", "sudo yum install -y httpd", "sudo systemctl start httpd" ,"sudo systemctl enable httpd", "sudo touch /var/www/html/index.html"};
-            asg.AddUserData(userdata);
+            //asg.AddUserData(userdata);
 
             //Create DB Security group
             SecurityGroup dbsecGroup = new SecurityGroup(this, "dbsecuritygroup", new SecurityGroupProps{
