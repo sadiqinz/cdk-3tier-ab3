@@ -5,8 +5,8 @@ echo "Starting Yum Update to see what is happening"
 #echo "After Yum update"
 #sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
 #sudo yum install -y httpd
-#sudo yum install -y ruby
-sudo yum install -y wget
+sudo yum install -y ruby
+#sudo yum install -y wget
 cd /tmp
 wget https://aws-codedeploy-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/latest/install
 chmod +x ./install
