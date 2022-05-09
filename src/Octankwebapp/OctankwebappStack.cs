@@ -79,7 +79,7 @@ namespace Octankwebapp
 
             //Create a CloudFront Distribution and point to ALB
             new Distribution(this, "octankdistribution", new DistributionProps{
-                DefaultBehavior = new BehaviorOptions { Origin = new LoadBalancerV2Origin(lb), OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER },
+                DefaultBehavior = new BehaviorOptions { Origin = new LoadBalancerV2Origin(lb), OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER, ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS },
                 DomainNames = new [] { "www.octankfootwear.cloud" },
                 Certificate = acmCert
 
