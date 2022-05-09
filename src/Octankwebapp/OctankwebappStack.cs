@@ -31,7 +31,7 @@ namespace Octankwebapp
             // IAM role for our Web instance
             var webInstanceRole = new Role(this, "instancerole", new RoleProps{
                 AssumedBy = new ServicePrincipal("ec2.amazonaws.com"),
-                ManagedPolicies = new [] {ManagedPolicy.FromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")}
+                ManagedPolicies = new [] {ManagedPolicy.FromAwsManagedPolicyName("CloudWatchLogsFullAccess"), ManagedPolicy.FromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"), ManagedPolicy.FromAwsManagedPolicyName("CloudWatchAgentServerPolicy")}
             });
             
             // Grant access to S3 artifact bucket

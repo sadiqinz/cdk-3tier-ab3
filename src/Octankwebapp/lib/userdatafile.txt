@@ -14,8 +14,13 @@ sudo ./install auto
 sudo service codedeploy-agent status
 sudo service codedeploy-agent start
 sudo service codedeploy-agent status
-sudo systemctl start httpd
-sudo systemctl enable httpd
+# Install CloudWatch agent
+sudo yum install amazon-cloudwatch-agent
+
+
+
+#sudo systemctl start httpd
+#sudo systemctl enable httpd
 #cd /var/www/html
 #sudo bash -c "cat << EOF > index.html
 #<!doctype html>
