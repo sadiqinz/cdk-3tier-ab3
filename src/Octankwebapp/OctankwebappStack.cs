@@ -2,10 +2,13 @@ using Amazon.CDK;
 using Constructs;
 using Amazon.CDK.AWS.ElasticLoadBalancingV2;
 using Amazon.CDK.AWS.AutoScaling;
+using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.RDS;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.AWS.CloudFront;
+using Amazon.CDK.AWS.CloudFront.Origins;
 using System.IO;
 using System;
 using System.Text;
@@ -20,7 +23,9 @@ namespace Octankwebapp
         {
             // Create certificate listener
             ListenerCertificate mylistener = new ListenerCertificate("arn:aws:acm:ap-southeast-2:808754908315:certificate/094adde5-dd39-492b-8308-31e3cd1ece29");
-            
+            // Import ACM certificate
+            ICertificate acmCert = Certificate.FromCertificateArn(this, "ACM Certificate", "arn:aws:acm:us-east-1:808754908315:certificate/35440d63-7315-460d-8938-c6eaac4cacc1");
+
             // S3 bucket with existing artifacts - This would be created outside the stack
             var artifactBucket = Bucket.FromBucketName(this, "ArtifactBucket", "octankwebapp-artifacts-bucket");
 
@@ -72,6 +77,14 @@ namespace Octankwebapp
                     InternetFacing = true, 
             });
 
+            //Create a CloudFront Distribution and point to ALB
+            new Distribution(this, "octankdistribution", new DistributionProps{
+                DefaultBehavior = new BehaviorOptions { Origin = new LoadBalancerV2Origin(lb) },
+                DomainNames = new [] { "www.octankfootwear.cloud" },
+                Certificate = acmCert
+
+            });
+            
             // Target group with duration-based stickiness with load-balancer generated cookie
             ApplicationTargetGroup tg1 = new ApplicationTargetGroup(this, "TG1", new ApplicationTargetGroupProps {
                 TargetType = TargetType.INSTANCE,

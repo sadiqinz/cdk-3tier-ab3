@@ -16,9 +16,6 @@ sudo service codedeploy-agent start
 sudo service codedeploy-agent status
 # Install CloudWatch agent
 sudo yum install amazon-cloudwatch-agent
-
-
-
 #sudo systemctl start httpd
 #sudo systemctl enable httpd
 #cd /var/www/html
