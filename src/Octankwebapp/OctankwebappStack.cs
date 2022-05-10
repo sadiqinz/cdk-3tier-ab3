@@ -229,7 +229,10 @@ namespace Octankwebapp
                  TargetRequestsPerMinute =60
              });
 
-
+            //Add User Data to Interal App Server    
+            string[] appuserdata = System.IO.File.ReadAllLines("./src/Octankwebapp/lib/appuserdata.txt");
+            intasg.AddUserData(appuserdata);
+            
             //Output required service values
             //Output DBSecret
             new CfnOutput(this, "DBSecret", new CfnOutputProps{

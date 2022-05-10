@@ -1,0 +1,39 @@
+sudo yum update -y
+echo "After Yum update"
+#sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+sudo yum install -y httpd
+sudo yum install -y ruby
+#sudo yum install -y wget
+cd /tmp
+wget https://aws-codedeploy-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+sudo service codedeploy-agent status
+sudo service codedeploy-agent start
+sudo service codedeploy-agent status
+# Install CloudWatch agent
+#sudo yum install amazon-cloudwatch-agent
+sudo systemctl start httpd
+sudo systemctl enable httpd
+cd /var/www/html
+sudo bash -c "cat << EOF > index.html
+<!doctype html>
+<html>
+  <head>
+    <title>Octank Footwear WebApp!</title>
+  </head>
+  <body>
+    <p>This is a sample page and will be replaced with actual application</p>
+  </body>
+</html>
+EOF
+"
+#sudo touch /var/www/html/index.html
+#sudo mkdir /var/www/inc
+#sudo pip3 install boto3
+#sudo aws s3 cp s3://abtraining-s3-bucket-1234/dbinfo.inc /var/www/inc/dbinfo.inc
+#sudo aws s3 cp s3://abtraining-s3-bucket-1234/bootstrapserver.py /var/www/inc/bootstrapserver.py
+#sudo aws s3 cp s3://abtraining-s3-bucket-1234/SamplePage.php /var/www/html/SamplePage.php
+#sudo cd /var/www/inc
+#sudo chmod a+x /var/www/inc/bootstrapserver.py
+#sudo python3 /var/www/inc/bootstrapserver.py
