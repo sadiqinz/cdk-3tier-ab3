@@ -48,5 +48,9 @@ aws s3api put-object --bucket octankwebapp-artifacts-bucket --key dbinfo.inc --b
 aws s3api put-object --bucket octankwebapp-artifacts-bucket --key bootstrapserver.py --body ./src/Abtraining/lib/bootstrapserver.py
 aws s3api put-object --bucket octankwebapp-artifacts-bucket --key SamplePage.php --body SamplePage.php
 
+**** Creating Code Deploy Application and Deployment ****
+aws deploy create-application --application-name OctankWebApp-ShoesApp --compute-platform Server
 
-
+aws deploy create-deployment-group \
+     --cli-input-json file://codedeploy.json \
+     --region ap-southeast-2

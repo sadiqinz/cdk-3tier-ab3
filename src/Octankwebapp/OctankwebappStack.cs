@@ -116,6 +116,7 @@ namespace Octankwebapp
                 TargetType = TargetType.INSTANCE,
                 Port = 80,
                 StickinessCookieDuration = Duration.Minutes(5),
+                DeregistrationDelay = Duration.Seconds(5),
                 Vpc = baseNetwork.abVpc,
                 HealthCheck = new Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck { Path = "/index.php", Interval = Duration.Seconds(10) }
             });
@@ -242,7 +243,8 @@ namespace Octankwebapp
                 TargetType = TargetType.INSTANCE,
                 Port = 80,
                 StickinessCookieDuration = Duration.Minutes(5),
-                Vpc = baseNetwork.abVpc                
+                Vpc = baseNetwork.abVpc,
+                DeregistrationDelay = Duration.Seconds(5)             
             });           
 
             //Add TargetGroup to listener

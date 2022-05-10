@@ -1,0 +1,32 @@
+{
+    "applicationName": "OctankWebApp-ShoesApp",
+    
+    "blueGreenDeploymentConfiguration": {
+       "deploymentReadyOption": {
+          "actionOnTimeout": "CONTINUE_DEPLOYMENT",
+          "waitTimeInMinutes": 0
+       },
+       "terminateBlueInstancesOnDeploymentSuccess": {
+          "action": "TERMINATE",
+          "terminationWaitTimeInMinutes": 5
+       },
+       "greenFleetProvisioningOption": {
+        "action": "COPY_AUTO_SCALING_GROUP"
+      }
+    },
+    "deploymentGroupName": "OcktankWebApp_DG",
+    "deploymentStyle": {
+       "deploymentOption": "WITH_TRAFFIC_CONTROL",
+       "deploymentType": "BLUE_GREEN"
+    },
+    "loadBalancerInfo": {
+       "targetGroupInfoList": [
+         {
+            "name": "Octan-TG1F7-A5LMLQUNC1EF"
+         }
+       ]
+    },
+    "serviceRoleArn": "arn:aws:iam::808754908315:role/octank-codedeploy-role",
+    "deploymentConfigName": "CodeDeployDefault.AllAtOnce",
+    "autoScalingGroups" : ["CodeDeploy_OctankWeb-Blue-Green_d-S9LMN36HG"]
+ }
