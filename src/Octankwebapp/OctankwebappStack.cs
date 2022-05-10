@@ -57,21 +57,37 @@ namespace Octankwebapp
             SecurityGroup instanceSG = new SecurityGroup(this, "instancesg", new SecurityGroupProps{
                 Vpc = baseNetwork.abVpc
             });
-            //Create an AutoScalingGroup
-            AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "myasg", new AutoScalingGroupProps{
-                Cooldown = Duration.Seconds(20),
-                Vpc = baseNetwork.abVpc,
-                VpcSubnets = new SubnetSelection {
-                    SubnetGroupName = "webtier"
-                },
+            // //Create an AutoScalingGroup
+            // AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "myasg", new AutoScalingGroupProps{
+            //     Cooldown = Duration.Seconds(20),
+            //     Vpc = baseNetwork.abVpc,
+            //     VpcSubnets = new SubnetSelection {
+            //         SubnetGroupName = "webtier"
+            //     },
+            //     InstanceType = InstanceType.Of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
+            //     MachineImage = new AmazonLinuxImage(new AmazonLinuxImageProps {
+            //         Generation = AmazonLinuxGeneration.AMAZON_LINUX_2
+            //     }),
+            //     Role = webInstanceRole,
+            //     SecurityGroup = instanceSG,
+            //     MinCapacity = 1,
+            //     MaxCapacity = 4,
+            //     KeyName = "tmpInstanceKey"
+            // });
+            //Add UserData
+            string[] userdata = System.IO.File.ReadAllLines("./src/Octankwebapp/lib/userdatafile.txt");
+
+            //Create a Launch Template
+            UserData initData = UserData.ForLinux();
+            initData.AddCommands(userdata);
+            LaunchTemplate webservertemplate = new LaunchTemplate(this, "webservertemplate", new LaunchTemplateProps{
+                UserData = initData,
                 InstanceType = InstanceType.Of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
                 MachineImage = new AmazonLinuxImage(new AmazonLinuxImageProps {
                     Generation = AmazonLinuxGeneration.AMAZON_LINUX_2
                 }),
                 Role = webInstanceRole,
-                SecurityGroup = instanceSG,
-                MinCapacity = 1,
-                MaxCapacity = 4,
+                SecurityGroup = instanceSG,     
                 KeyName = "tmpInstanceKey"
             });
 
@@ -108,20 +124,19 @@ namespace Octankwebapp
             listener.AddAction("listerntg", new AddApplicationActionProps {
                 Action = ListenerAction.Forward(new IApplicationTargetGroup[] {tg1})
             });
-            //Attache ASG to load balancer
-            asg.AttachToApplicationTargetGroup(tg1);
-            //Setup ASG's scaling properties
-            asg.ScaleOnRequestCount("ReasonableLoad", new RequestCountScalingProps{
-                TargetRequestsPerMinute =60
-            });
+            // //Attache ASG to load balancer
+            // asg.AttachToApplicationTargetGroup(tg1);
+            // //Setup ASG's scaling properties
+            // asg.ScaleOnRequestCount("ReasonableLoad", new RequestCountScalingProps{
+            //     TargetRequestsPerMinute =60
+            // });
             
-            //Add UserData
-            string[] userdata = System.IO.File.ReadAllLines("./src/Octankwebapp/lib/userdatafile.txt");
+            
 
             //Console.WriteLine("[{0}]", string.Join(", ", userdata));
 
             //{"sudo yum update -y", "sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2", "cat /etc/system-release", "sudo yum install -y httpd", "sudo systemctl start httpd" ,"sudo systemctl enable httpd", "sudo touch /var/www/html/index.html"};
-            asg.AddUserData(userdata);
+            //asg.AddUserData(userdata);
            
 
             //Create DB Security group
@@ -174,6 +189,7 @@ namespace Octankwebapp
                 KeyName = "tmpInstanceKey"
             });
 
+            
             //Create a load balancer without any targets     
             ApplicationLoadBalancer applb = new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancer (this, "IntLoadBalancer", new ApplicationLoadBalancerProps {
                     Vpc = baseNetwork.abVpc,
@@ -205,13 +221,13 @@ namespace Octankwebapp
             intlistener.AddAction("Intlisterntg", new AddApplicationActionProps {
                 Action = ListenerAction.Forward(new IApplicationTargetGroup[] {inttg1})
             });
-            //Attache ASG to load balancer
+            // //Attache ASG to load balancer
             intasg.AttachToApplicationTargetGroup(inttg1);
 
-            //Setup ASG's scaling properties
+            // //Setup ASG's scaling properties
             intasg.ScaleOnRequestCount("ReasonableLoad", new RequestCountScalingProps{
-                TargetRequestsPerMinute =60
-            });
+                 TargetRequestsPerMinute =60
+             });
 
 
             //Output required service values
