@@ -228,6 +228,11 @@ namespace Octankwebapp
             new CfnOutput(this, "ALBAddress", new CfnOutputProps{
                 Value = lb.LoadBalancerDnsName
             });
+
+            //Internal ALB address
+            new CfnOutput(this, "IntALBAddress", new CfnOutputProps{
+                Value = applb.LoadBalancerDnsName
+            });
         }         
     }
 }
