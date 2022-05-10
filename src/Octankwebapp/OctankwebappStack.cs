@@ -150,24 +150,46 @@ namespace Octankwebapp
             SecurityGroup dbsecGroup = new SecurityGroup(this, "dbsecuritygroup", new SecurityGroupProps{
                 Vpc = baseNetwork.abVpc
             });
-            //Create required DB
-            DatabaseInstance dbInstance = new DatabaseInstance(this, "SingleDBInstnace", new DatabaseInstanceProps{
-                Engine = DatabaseInstanceEngine.Mysql(new MySqlInstanceEngineProps{ Version = MysqlEngineVersion.VER_8_0_20}),
-                DatabaseName = "shoes_db",
-                Vpc = baseNetwork.abVpc,
+            
+            //Create Aurora Serverless cluster
+            ServerlessCluster dbCluster = new ServerlessCluster(this, "AuroraServerlessCluster", new ServerlessClusterProps{
+                Engine = DatabaseClusterEngine.AURORA_MYSQL,
+                Vpc = baseNetwork.abVpc,  
                 VpcSubnets = new SubnetSelection{
                     SubnetGroupName = "dbtier"
                 },
-                SecurityGroups = new [] {dbsecGroup},
-                InstanceType = InstanceType.Of(InstanceClass.BURSTABLE3, InstanceSize.MEDIUM),
+                SecurityGroups = new [] {dbsecGroup}, 
+                EnableDataApi = true,
+                DefaultDatabaseName = "shoes_db",
+                Scaling = new ServerlessScalingOptions {
+                    AutoPause = Duration.Minutes(30),  // default is to pause after 5 minutes of idle time
+                    MinCapacity = AuroraCapacityUnit.ACU_1,  // default is 2 Aurora capacity units (ACUs)
+                    MaxCapacity = AuroraCapacityUnit.ACU_8
+                },
                 Credentials = Credentials.FromGeneratedSecret("proddbuser")
             });
 
-            //Give access to secrets manager for Instance role
-            dbInstance.Secret.GrantRead(webInstanceRole);
+            dbCluster.Secret.GrantRead(webInstanceRole);
+            dbCluster.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(3306));  
+            
+            // //Create required DB
+            // DatabaseInstance dbInstance = new DatabaseInstance(this, "SingleDBInstnace", new DatabaseInstanceProps{
+            //     Engine = DatabaseInstanceEngine.Mysql(new MySqlInstanceEngineProps{ Version = MysqlEngineVersion.VER_8_0_20}),
+            //     DatabaseName = "shoes_db",
+            //     Vpc = baseNetwork.abVpc,
+            //     VpcSubnets = new SubnetSelection{
+            //         SubnetGroupName = "dbtier"
+            //     },
+            //     SecurityGroups = new [] {dbsecGroup},
+            //     InstanceType = InstanceType.Of(InstanceClass.BURSTABLE3, InstanceSize.MEDIUM),
+            //     Credentials = Credentials.FromGeneratedSecret("proddbuser")
+            // });
 
-            //Allow access from instances to DB
-            dbInstance.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(3306));    
+            // //Give access to secrets manager for Instance role
+            // dbInstance.Secret.GrantRead(webInstanceRole);
+
+            // //Allow access from instances to DB
+            // dbInstance.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(3306));    
 
             //Create Autoscaling Group and a Load Balancer for Applicaiton Tier
             //Create security group to be used for instances
@@ -175,8 +197,8 @@ namespace Octankwebapp
                 Vpc = baseNetwork.abVpc
             });
 
-            //Allow access to Db Tier
-            dbInstance.Connections.AllowFrom(Peer.SecurityGroupId(appInstanceSG.SecurityGroupId), Port.Tcp(3306));  
+            // //Allow access to Db Tier
+            // dbInstance.Connections.AllowFrom(Peer.SecurityGroupId(appInstanceSG.SecurityGroupId), Port.Tcp(3306));  
 
             //Create an AutoScalingGroup
             AutoScalingGroup intasg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "intasg", new AutoScalingGroupProps{
@@ -243,7 +265,7 @@ namespace Octankwebapp
             //Output required service values
             //Output DBSecret
             new CfnOutput(this, "DBSecret", new CfnOutputProps{
-                Value = dbInstance.Secret.SecretFullArn
+                Value = dbCluster.Secret.SecretFullArn
             });   
 
             //Output ALB address
