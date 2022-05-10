@@ -20,3 +20,8 @@ It uses the [.NET Core CLI](https://docs.microsoft.com/dotnet/articles/core/) to
 3. Create EC2 Instance KMS Key for access to server if required
 4. Create ACM Certificate and specify the ARN
 4. Specify Secret Manager's ARN in startup script
+
+# Steps to fix Target Group issue in Code Deploy
+1. Refresh to choose the correct ASB
+2. Re-Create ASG after Code Deploy has been created
+

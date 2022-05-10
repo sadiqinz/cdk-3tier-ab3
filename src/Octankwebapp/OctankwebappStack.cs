@@ -53,10 +53,7 @@ namespace Octankwebapp
             //Create base VPC
             var baseNetwork = new NetworkSetup(this, "NetworkSetupAU");                        
             
-            //Create security group to be used for instances
-            SecurityGroup instanceSG = new SecurityGroup(this, "instancesg", new SecurityGroupProps{
-                Vpc = baseNetwork.abVpc
-            });
+            
             // //Create an AutoScalingGroup
             // AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "myasg", new AutoScalingGroupProps{
             //     Cooldown = Duration.Seconds(20),
@@ -75,7 +72,21 @@ namespace Octankwebapp
             //     KeyName = "tmpInstanceKey"
             // });
             //Add UserData
+
+            //Create a load balancer without any targets     
+            ApplicationLoadBalancer lb = new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancer (this, "ExtLoadBalancer", new ApplicationLoadBalancerProps {
+                    Vpc = baseNetwork.abVpc,                    
+                    InternetFacing = true, 
+            });           
+            
             string[] userdata = System.IO.File.ReadAllLines("./src/Octankwebapp/lib/userdatafile.txt");
+
+            //Create security group to be used for instances
+            SecurityGroup instanceSG = new SecurityGroup(this, "instancesg", new SecurityGroupProps{
+                Vpc = baseNetwork.abVpc
+            });
+            //Allow access from Load Balancer
+            instanceSG.Connections.AllowFrom(lb.Connections, Port.Tcp(80));
 
             //Create a Launch Template
             UserData initData = UserData.ForLinux();
@@ -91,12 +102,7 @@ namespace Octankwebapp
                 KeyName = "tmpInstanceKey"
             });
 
-            //Create a load balancer without any targets     
-            ApplicationLoadBalancer lb = new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancer (this, "ExtLoadBalancer", new ApplicationLoadBalancerProps {
-                    Vpc = baseNetwork.abVpc,                    
-                    InternetFacing = true, 
-            });
-
+            
             //Create a CloudFront Distribution and point to ALB
             new Distribution(this, "octankdistribution", new DistributionProps{
                 DefaultBehavior = new BehaviorOptions { Origin = new LoadBalancerV2Origin(lb), OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER, ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS },
@@ -110,7 +116,8 @@ namespace Octankwebapp
                 TargetType = TargetType.INSTANCE,
                 Port = 80,
                 StickinessCookieDuration = Duration.Minutes(5),
-                Vpc = baseNetwork.abVpc
+                Vpc = baseNetwork.abVpc,
+                HealthCheck = new Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck { Path = "/index.php", Interval = Duration.Seconds(10) }
             });
             //Add a default listener to this lb
             ApplicationListener listener = lb.AddListener("ListenerHttp", new BaseApplicationListenerProps {
@@ -232,7 +239,7 @@ namespace Octankwebapp
             //Add User Data to Interal App Server    
             string[] appuserdata = System.IO.File.ReadAllLines("./src/Octankwebapp/lib/appuserdata.txt");
             intasg.AddUserData(appuserdata);
-            
+
             //Output required service values
             //Output DBSecret
             new CfnOutput(this, "DBSecret", new CfnOutputProps{
