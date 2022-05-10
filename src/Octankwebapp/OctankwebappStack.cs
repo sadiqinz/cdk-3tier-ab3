@@ -122,11 +122,7 @@ namespace Octankwebapp
 
             //{"sudo yum update -y", "sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2", "cat /etc/system-release", "sudo yum install -y httpd", "sudo systemctl start httpd" ,"sudo systemctl enable httpd", "sudo touch /var/www/html/index.html"};
             asg.AddUserData(userdata);
-
-            //Add scaling policy
-            asg.ScaleOnRequestCount("LimiteRPS", new RequestCountScalingProps{
-                TargetRequestsPerMinute = 50
-            });
+           
 
             //Create DB Security group
             SecurityGroup dbsecGroup = new SecurityGroup(this, "dbsecuritygroup", new SecurityGroupProps{
