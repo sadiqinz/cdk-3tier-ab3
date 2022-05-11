@@ -175,7 +175,7 @@ namespace Octankwebapp
             redissecGroup.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(11211));
             //Create Elasticache SubnetGroup
             CfnSubnetGroup cfnCacheSubnetGroup = new CfnSubnetGroup(this, "MyCfnSubnetGroup", new CfnSubnetGroupProps {
-                Description = "description",
+                Description = "CacheSubnetGroup",
                 SubnetIds = selection.SubnetIds
             });
             //Create Memcached Cluster
