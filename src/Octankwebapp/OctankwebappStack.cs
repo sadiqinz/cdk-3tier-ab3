@@ -151,9 +151,33 @@ namespace Octankwebapp
             SecurityGroup redissecGroup = new SecurityGroup(this, "redissecuritygroup", new SecurityGroupProps{
                 Vpc = baseNetwork.abVpc
             });
-           
+
+            var baseVPC = baseNetwork.abVpc;
+            ISelectedSubnets selection = baseVPC.SelectSubnets(new SubnetSelection {
+                SubnetGroupName = "dbtier"
+            });
+
+            SubnetSelection dbsubnets = new SubnetSelection {
+                SubnetGroupName = "dbtier"
+            };
+            // //string[] dbsubnetlist = new String[2];
+            // string subnetList = "";ß
+            // //int i = 0;
+            // foreach (var subnet in dbsubnets.Subnets)
+            // {
+            //     subnetList += "\""+subnet.SubnetId +"\",";
+            //     //dbsubnetlist.SetValue(subnet.SubnetId, i);
+            //     //i++;
+            // };
+            // //Console.WriteLine("[{0}]", subnetList);
+            
             //Allow access from Webserver to the Cluster
             redissecGroup.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(11211));
+            //Create Elasticache SubnetGroup
+            CfnSubnetGroup cfnCacheSubnetGroup = new CfnSubnetGroup(this, "MyCfnSubnetGroup", new CfnSubnetGroupProps {
+                Description = "description",
+                SubnetIds = selection.SubnetIds
+            });
             //Create Memcached Cluster
             CfnCacheCluster cfnCacheCluster = new CfnCacheCluster(this, "MyCfnCacheCluster", new CfnCacheClusterProps {
                 CacheNodeType = "cache.t3.micro",
@@ -163,7 +187,8 @@ namespace Octankwebapp
                 AutoMinorVersionUpgrade = true,
                 AzMode = "croass-az",
                 PreferredMaintenanceWindow = "sun:23:00-mon:01:30",
-                VpcSecurityGroupIds = new [] { redissecGroup.SecurityGroupId }
+                VpcSecurityGroupIds = new [] { redissecGroup.SecurityGroupId },
+                CacheParameterGroupName = cfnCacheSubnetGroup.CacheSubnetGroupName
             });
            
 
@@ -229,7 +254,7 @@ namespace Octankwebapp
                 Vpc = baseNetwork.abVpc,
                 VpcSubnets = new SubnetSelection {
                     SubnetGroupName = "apptier"
-                },
+                },                
                 InstanceType = InstanceType.Of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
                 MachineImage = new AmazonLinuxImage(new AmazonLinuxImageProps {
                     Generation = AmazonLinuxGeneration.AMAZON_LINUX_2
