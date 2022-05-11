@@ -7,6 +7,7 @@ using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.RDS;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.AWS.ElastiCache;
 using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.CloudFront.Origins;
 using System.IO;
@@ -145,13 +146,33 @@ namespace Octankwebapp
 
             //{"sudo yum update -y", "sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2", "cat /etc/system-release", "sudo yum install -y httpd", "sudo systemctl start httpd" ,"sudo systemctl enable httpd", "sudo touch /var/www/html/index.html"};
             //asg.AddUserData(userdata);
+
+            //Create Elasticache Security group
+            SecurityGroup redissecGroup = new SecurityGroup(this, "redissecuritygroup", new SecurityGroupProps{
+                Vpc = baseNetwork.abVpc
+            });
+           
+            //Allow access from Webserver to the Cluster
+            redissecGroup.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(11211));
+            //Create Memcached Cluster
+            CfnCacheCluster cfnCacheCluster = new CfnCacheCluster(this, "MyCfnCacheCluster", new CfnCacheClusterProps {
+                CacheNodeType = "cache.t3.micro",
+                Engine = "memcached",
+                NumCacheNodes = 2,
+                // the properties below are optional
+                AutoMinorVersionUpgrade = true,
+                AzMode = "croass-az",
+                PreferredMaintenanceWindow = "sun:23:00-mon:01:30",
+                VpcSecurityGroupIds = new [] { redissecGroup.SecurityGroupId }
+            });
            
 
             //Create DB Security group
             SecurityGroup dbsecGroup = new SecurityGroup(this, "dbsecuritygroup", new SecurityGroupProps{
                 Vpc = baseNetwork.abVpc
             });
-            
+
+
             //Create Aurora Serverless cluster
             ServerlessCluster dbCluster = new ServerlessCluster(this, "AuroraServerlessCluster", new ServerlessClusterProps{
                 Engine = DatabaseClusterEngine.AURORA_MYSQL,
@@ -165,7 +186,8 @@ namespace Octankwebapp
                 Scaling = new ServerlessScalingOptions {
                     AutoPause = Duration.Minutes(30),  // default is to pause after 5 minutes of idle time
                     MinCapacity = AuroraCapacityUnit.ACU_1,  // default is 2 Aurora capacity units (ACUs)
-                    MaxCapacity = AuroraCapacityUnit.ACU_8
+                    MaxCapacity = AuroraCapacityUnit.ACU_8,
+                    
                 },
                 Credentials = Credentials.FromGeneratedSecret("proddbuser")
             });
