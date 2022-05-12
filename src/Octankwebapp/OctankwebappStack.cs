@@ -86,7 +86,7 @@ namespace Octankwebapp
             });
 
             //Create an AutoScalingGroup
-            AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "myasg", new AutoScalingGroupProps{
+            AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "ExtAsg", new AutoScalingGroupProps{
                 Cooldown = Duration.Seconds(20),
                 Vpc = baseNetwork.abVpc,
                 LaunchTemplate = webservertemplate,
@@ -103,7 +103,8 @@ namespace Octankwebapp
                 MetricName = "NewConnectionCount",
                 DimensionsMap = new Dictionary<string, string> {
                     { "LoadBalancer", lb.LoadBalancerName}
-                }
+                },
+                Period = Duration.Seconds(60)
             });
 
             //Add Scaling policy based on Metric
@@ -114,7 +115,7 @@ namespace Octankwebapp
             });
 
             // Target group with duration-based stickiness with load-balancer generated cookie
-            ApplicationTargetGroup tg1 = new ApplicationTargetGroup(this, "TG1", new ApplicationTargetGroupProps {
+            ApplicationTargetGroup tg1 = new ApplicationTargetGroup(this, "WebTG1", new ApplicationTargetGroupProps {
                 TargetType = TargetType.INSTANCE,
                 Port = 80,
                 StickinessCookieDuration = Duration.Minutes(5),
@@ -210,7 +211,7 @@ namespace Octankwebapp
             });
 
             //Create an AutoScalingGroup
-            AutoScalingGroup intasg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "intasg", new AutoScalingGroupProps{
+            AutoScalingGroup intasg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "IntAsg", new AutoScalingGroupProps{
                 Cooldown = Duration.Seconds(20),
                 Vpc = baseNetwork.abVpc,
                 VpcSubnets = new SubnetSelection {
@@ -240,7 +241,7 @@ namespace Octankwebapp
             
 
             // Target group with duration-based stickiness with load-balancer generated cookie
-            ApplicationTargetGroup inttg1 = new ApplicationTargetGroup(this, "IntTG1", new ApplicationTargetGroupProps {
+            ApplicationTargetGroup inttg1 = new ApplicationTargetGroup(this, "AppTG1", new ApplicationTargetGroupProps {
                 TargetType = TargetType.INSTANCE,
                 Port = 80,
                 StickinessCookieDuration = Duration.Minutes(5),
