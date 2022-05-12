@@ -179,17 +179,17 @@ namespace Octankwebapp
                 SubnetIds = selection.SubnetIds
             });
             //Create Memcached Cluster
-            CfnCacheCluster cfnCacheCluster = new CfnCacheCluster(this, "MyCfnCacheCluster", new CfnCacheClusterProps {
-                CacheNodeType = "cache.t3.micro",
-                Engine = "memcached",
-                NumCacheNodes = 2,
-                // the properties below are optional
-                AutoMinorVersionUpgrade = true,
-                AzMode = "croass-az",
-                PreferredMaintenanceWindow = "sun:23:00-mon:01:30",                
-                VpcSecurityGroupIds = new [] { redissecGroup.SecurityGroupId },
-                CacheSubnetGroupName = "octan-mycfn-1uc2yw3wfg0p8"                                
-            });
+            // CfnCacheCluster cfnCacheCluster = new CfnCacheCluster(this, "MyCfnCacheCluster", new CfnCacheClusterProps {
+            //     CacheNodeType = "cache.t3.micro",
+            //     Engine = "memcached",
+            //     NumCacheNodes = 2,
+            //     // the properties below are optional
+            //     AutoMinorVersionUpgrade = true,
+            //     AzMode = "croass-az",
+            //     PreferredMaintenanceWindow = "sun:23:00-mon:01:30",                
+            //     VpcSecurityGroupIds = new [] { redissecGroup.SecurityGroupId },
+            //     CacheSubnetGroupName = "octan-mycfn-1uc2yw3wfg0p8"                                
+            // });
            
 
             //Create DB Security group
