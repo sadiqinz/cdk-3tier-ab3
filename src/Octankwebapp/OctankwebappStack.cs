@@ -119,7 +119,7 @@ namespace Octankwebapp
                 StickinessCookieDuration = Duration.Minutes(5),
                 DeregistrationDelay = Duration.Seconds(5),
                 Vpc = baseNetwork.abVpc,
-                HealthCheck = new Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck { Path = "/index.php", Interval = Duration.Seconds(10) }
+                HealthCheck = new Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck { Path = "/index.php", Interval = Duration.Seconds(15) }
             });
             //Add a default listener to this lb
             ApplicationListener listener = lb.AddListener("ListenerHttp", new BaseApplicationListenerProps {
@@ -139,8 +139,7 @@ namespace Octankwebapp
             // asg.ScaleOnRequestCount("ReasonableLoad", new RequestCountScalingProps{
             //     TargetRequestsPerMinute =60
             // });
-            
-            
+                        
 
             //Console.WriteLine("[{0}]", string.Join(", ", userdata));
 
@@ -160,17 +159,7 @@ namespace Octankwebapp
             SubnetSelection dbsubnets = new SubnetSelection {
                 SubnetGroupName = "dbtier"
             };
-            // //string[] dbsubnetlist = new String[2];
-            // string subnetList = "";ß
-            // //int i = 0;
-            // foreach (var subnet in dbsubnets.Subnets)
-            // {
-            //     subnetList += "\""+subnet.SubnetId +"\",";
-            //     //dbsubnetlist.SetValue(subnet.SubnetId, i);
-            //     //i++;
-            // };
-            // //Console.WriteLine("[{0}]", subnetList);
-            
+                        
             //Allow access from Webserver to the Cluster
             redissecGroup.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(11211));
             //Create Elasticache SubnetGroup
@@ -178,25 +167,12 @@ namespace Octankwebapp
                 Description = "CacheSubnetGroup",
                 SubnetIds = selection.SubnetIds
             });
-            //Create Memcached Cluster
-            // CfnCacheCluster cfnCacheCluster = new CfnCacheCluster(this, "MyCfnCacheCluster", new CfnCacheClusterProps {
-            //     CacheNodeType = "cache.t3.micro",
-            //     Engine = "memcached",
-            //     NumCacheNodes = 2,
-            //     // the properties below are optional
-            //     AutoMinorVersionUpgrade = true,
-            //     AzMode = "croass-az",
-            //     PreferredMaintenanceWindow = "sun:23:00-mon:01:30",                
-            //     VpcSecurityGroupIds = new [] { redissecGroup.SecurityGroupId },
-            //     CacheSubnetGroupName = "octan-mycfn-1uc2yw3wfg0p8"                                
-            // });
-           
+                       
 
             //Create DB Security group
             SecurityGroup dbsecGroup = new SecurityGroup(this, "dbsecuritygroup", new SecurityGroupProps{
                 Vpc = baseNetwork.abVpc
             });
-
 
             //Create Aurora Serverless cluster
             ServerlessCluster dbCluster = new ServerlessCluster(this, "AuroraServerlessCluster", new ServerlessClusterProps{
@@ -220,33 +196,11 @@ namespace Octankwebapp
             dbCluster.Secret.GrantRead(webInstanceRole);
             dbCluster.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(3306));  
             
-            // //Create required DB
-            // DatabaseInstance dbInstance = new DatabaseInstance(this, "SingleDBInstnace", new DatabaseInstanceProps{
-            //     Engine = DatabaseInstanceEngine.Mysql(new MySqlInstanceEngineProps{ Version = MysqlEngineVersion.VER_8_0_20}),
-            //     DatabaseName = "shoes_db",
-            //     Vpc = baseNetwork.abVpc,
-            //     VpcSubnets = new SubnetSelection{
-            //         SubnetGroupName = "dbtier"
-            //     },
-            //     SecurityGroups = new [] {dbsecGroup},
-            //     InstanceType = InstanceType.Of(InstanceClass.BURSTABLE3, InstanceSize.MEDIUM),
-            //     Credentials = Credentials.FromGeneratedSecret("proddbuser")
-            // });
-
-            // //Give access to secrets manager for Instance role
-            // dbInstance.Secret.GrantRead(webInstanceRole);
-
-            // //Allow access from instances to DB
-            // dbInstance.Connections.AllowFrom(Peer.SecurityGroupId(instanceSG.SecurityGroupId), Port.Tcp(3306));    
-
             //Create Autoscaling Group and a Load Balancer for Applicaiton Tier
             //Create security group to be used for instances
             SecurityGroup appInstanceSG = new SecurityGroup(this, "appinstancesg", new SecurityGroupProps{
                 Vpc = baseNetwork.abVpc
             });
-
-            // //Allow access to Db Tier
-            // dbInstance.Connections.AllowFrom(Peer.SecurityGroupId(appInstanceSG.SecurityGroupId), Port.Tcp(3306));  
 
             //Create an AutoScalingGroup
             AutoScalingGroup intasg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "intasg", new AutoScalingGroupProps{
@@ -265,7 +219,6 @@ namespace Octankwebapp
                 MaxCapacity = 4,
                 KeyName = "tmpInstanceKey"
             });
-
             
             //Create a load balancer without any targets     
             ApplicationLoadBalancer applb = new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancer (this, "IntLoadBalancer", new ApplicationLoadBalancerProps {
