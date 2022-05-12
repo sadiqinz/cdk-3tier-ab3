@@ -19,7 +19,9 @@ It uses the [.NET Core CLI](https://docs.microsoft.com/dotnet/articles/core/) to
 2. Create CodeCommit repository
 3. Create EC2 Instance KMS Key for access to server if required
 4. Create ACM Certificate and specify the ARN
-4. Specify Secret Manager's ARN in startup script
+5. Specify Secret Manager's ARN in startup script
+6. Create Memcached Cluster
+7. Create WAF and attached to ALB
 
 # Steps to fix Target Group issue in Code Deploy
 1. Refresh to choose the correct ASB

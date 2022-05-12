@@ -9,10 +9,12 @@ using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.ElastiCache;
 using Amazon.CDK.AWS.CloudFront;
+using Amazon.CDK.AWS.CloudWatch;
 using Amazon.CDK.AWS.CloudFront.Origins;
 using System.IO;
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 
 namespace Octankwebapp
@@ -52,28 +54,8 @@ namespace Octankwebapp
             }));
 
             //Create base VPC
-            var baseNetwork = new NetworkSetup(this, "NetworkSetupAU");                        
-            
-            
-            // //Create an AutoScalingGroup
-            // AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "myasg", new AutoScalingGroupProps{
-            //     Cooldown = Duration.Seconds(20),
-            //     Vpc = baseNetwork.abVpc,
-            //     VpcSubnets = new SubnetSelection {
-            //         SubnetGroupName = "webtier"
-            //     },
-            //     InstanceType = InstanceType.Of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
-            //     MachineImage = new AmazonLinuxImage(new AmazonLinuxImageProps {
-            //         Generation = AmazonLinuxGeneration.AMAZON_LINUX_2
-            //     }),
-            //     Role = webInstanceRole,
-            //     SecurityGroup = instanceSG,
-            //     MinCapacity = 1,
-            //     MaxCapacity = 4,
-            //     KeyName = "tmpInstanceKey"
-            // });
-            //Add UserData
-
+            var baseNetwork = new NetworkSetup(this, "NetworkSetupAU");     
+                        
             //Create a load balancer without any targets     
             ApplicationLoadBalancer lb = new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancer (this, "ExtLoadBalancer", new ApplicationLoadBalancerProps {
                     Vpc = baseNetwork.abVpc,                    
@@ -103,15 +85,34 @@ namespace Octankwebapp
                 KeyName = "tmpInstanceKey"
             });
 
-            
-            //Create a CloudFront Distribution and point to ALB
-            new Distribution(this, "octankdistribution", new DistributionProps{
-                DefaultBehavior = new BehaviorOptions { Origin = new LoadBalancerV2Origin(lb), OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER, ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS, AllowedMethods = AllowedMethods.ALLOW_ALL },
-                DomainNames = new [] { "www.octankfootwear.cloud" },
-                Certificate = acmCert
-
+            //Create an AutoScalingGroup
+            AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "myasg", new AutoScalingGroupProps{
+                Cooldown = Duration.Seconds(20),
+                Vpc = baseNetwork.abVpc,
+                LaunchTemplate = webservertemplate,
+                VpcSubnets = new SubnetSelection {
+                    SubnetGroupName = "webtier"
+                },                
+                MinCapacity = 2,
+                MaxCapacity = 8                
             });
-            
+
+            //Create a new CloudWatch Metric
+            Metric networkTraffic = new Metric(new MetricProps{
+                Namespace = "AWS/ApplicationELB",
+                MetricName = "NewConnectionCount",
+                DimensionsMap = new Dictionary<string, string> {
+                    { "LoadBalancer", lb.LoadBalancerName}
+                }
+            });
+
+            //Add Scaling policy based on Metric
+            asg.ScaleOnMetric("ScaleToALBConnections", new BasicStepScalingPolicyProps{
+                Metric = networkTraffic,
+                ScalingSteps = new [] { new ScalingInterval { Upper = 10, Change = -1 }, new ScalingInterval {Lower = 50, Change = +2}, new ScalingInterval { Lower = 100, Change = +3 }},
+                AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY
+            });
+
             // Target group with duration-based stickiness with load-balancer generated cookie
             ApplicationTargetGroup tg1 = new ApplicationTargetGroup(this, "TG1", new ApplicationTargetGroupProps {
                 TargetType = TargetType.INSTANCE,
@@ -121,6 +122,7 @@ namespace Octankwebapp
                 Vpc = baseNetwork.abVpc,
                 HealthCheck = new Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck { Path = "/index.php", Interval = Duration.Seconds(15) }
             });
+
             //Add a default listener to this lb
             ApplicationListener listener = lb.AddListener("ListenerHttp", new BaseApplicationListenerProps {
                 Port = 443,
@@ -133,13 +135,18 @@ namespace Octankwebapp
             listener.AddAction("listerntg", new AddApplicationActionProps {
                 Action = ListenerAction.Forward(new IApplicationTargetGroup[] {tg1})
             });
-            // //Attache ASG to load balancer
-            // asg.AttachToApplicationTargetGroup(tg1);
-            // //Setup ASG's scaling properties
-            // asg.ScaleOnRequestCount("ReasonableLoad", new RequestCountScalingProps{
-            //     TargetRequestsPerMinute =60
-            // });
-                        
+
+            //Attache ASG to load balancer
+            asg.AttachToApplicationTargetGroup(tg1);
+
+            //Create a CloudFront Distribution and point to ALB
+            new Distribution(this, "octankdistribution", new DistributionProps{
+                DefaultBehavior = new BehaviorOptions { Origin = new LoadBalancerV2Origin(lb), OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER, ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS, AllowedMethods = AllowedMethods.ALLOW_ALL },
+                DomainNames = new [] { "www.octankfootwear.cloud" },
+                Certificate = acmCert
+
+            });
+            
 
             //Console.WriteLine("[{0}]", string.Join(", ", userdata));
 
@@ -219,7 +226,7 @@ namespace Octankwebapp
                 MaxCapacity = 4,
                 KeyName = "tmpInstanceKey"
             });
-            
+                        
             //Create a load balancer without any targets     
             ApplicationLoadBalancer applb = new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancer (this, "IntLoadBalancer", new ApplicationLoadBalancerProps {
                     Vpc = baseNetwork.abVpc,
@@ -229,14 +236,8 @@ namespace Octankwebapp
                     InternetFacing = false
             });
 
-            //Add a default listener to this internallb
-            ApplicationListener intlistener = applb.AddListener("IntListenerHttp", new BaseApplicationListenerProps {
-                Port = 80,
-                Open = true
-            });
-            intlistener.AddTargets("intTarget", new AddApplicationTargetsProps {
-                Port = 80
-            });
+            
+            
 
             // Target group with duration-based stickiness with load-balancer generated cookie
             ApplicationTargetGroup inttg1 = new ApplicationTargetGroup(this, "IntTG1", new ApplicationTargetGroupProps {
@@ -245,13 +246,19 @@ namespace Octankwebapp
                 StickinessCookieDuration = Duration.Minutes(5),
                 Vpc = baseNetwork.abVpc,
                 DeregistrationDelay = Duration.Seconds(5)             
-            });           
+            });        
+
+            //Add a default listener to this internallb
+            ApplicationListener intlistener = applb.AddListener("IntListenerHttp", new BaseApplicationListenerProps {
+                Port = 80,
+                Open = true,
+                DefaultAction = ListenerAction.Forward(new IApplicationTargetGroup[] {inttg1})
+            
+            });   
 
             //Add TargetGroup to listener
             inttg1.RegisterListener(intlistener);
-            intlistener.AddAction("Intlisterntg", new AddApplicationActionProps {
-                Action = ListenerAction.Forward(new IApplicationTargetGroup[] {inttg1})
-            });
+            
             // //Attache ASG to load balancer
             intasg.AttachToApplicationTargetGroup(inttg1);
 
