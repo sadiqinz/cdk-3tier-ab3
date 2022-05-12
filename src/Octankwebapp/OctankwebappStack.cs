@@ -110,9 +110,9 @@ namespace Octankwebapp
             //Add Scaling policy based on Metric
             //Create a new StepScalingPolicy            
             asg.ScaleOnMetric("ScaleToALBConnections", new BasicStepScalingPolicyProps{
-                Metric = lb.MetricActiveConnectionCount(),
+                Metric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) }),
                 ScalingSteps = new [] { new ScalingInterval { Upper = 10, Change = -1 }, new ScalingInterval {Lower = 50, Change = +2}, new ScalingInterval { Lower = 100, Change = +3 }},
-                AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY                
+                AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY
             });
 
 
