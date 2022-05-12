@@ -188,7 +188,7 @@ namespace Octankwebapp
                 AzMode = "croass-az",
                 PreferredMaintenanceWindow = "sun:23:00-mon:01:30",                
                 VpcSecurityGroupIds = new [] { redissecGroup.SecurityGroupId },
-                CacheSubnetGroupName = cfnCacheSubnetGroup.CacheSubnetGroupName                
+                CacheSubnetGroupName = "octan-mycfn-1uc2yw3wfg0p8"                                
             });
            
 
