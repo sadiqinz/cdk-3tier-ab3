@@ -97,22 +97,24 @@ namespace Octankwebapp
                 MaxCapacity = 8                
             });
 
-            //Create a new CloudWatch Metric
-            Metric networkTraffic = new Metric(new MetricProps{
-                Namespace = "AWS/ApplicationELB",
-                MetricName = "NewConnectionCount",
-                DimensionsMap = new Dictionary<string, string> {
-                    { "LoadBalancer", lb.LoadBalancerName}
-                },
-                Period = Duration.Seconds(60)
-            });
+            // //Create a new CloudWatch Metric
+            // Metric networkTraffic = new Metric(new MetricProps{
+            //     Namespace = "AWS/ApplicationELB",
+            //     MetricName = "NewConnectionCount",
+            //     DimensionsMap = new Dictionary<string, string> {
+            //         { "LoadBalancer", lb.LoadBalancerName}
+            //     },
+            //     Period = Duration.Seconds(60)
+            // });
 
             //Add Scaling policy based on Metric
+            //Create a new StepScalingPolicy            
             asg.ScaleOnMetric("ScaleToALBConnections", new BasicStepScalingPolicyProps{
-                Metric = networkTraffic,
+                Metric = lb.MetricActiveConnectionCount(),
                 ScalingSteps = new [] { new ScalingInterval { Upper = 10, Change = -1 }, new ScalingInterval {Lower = 50, Change = +2}, new ScalingInterval { Lower = 100, Change = +3 }},
-                AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY
+                AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY                
             });
+
 
             // Target group with duration-based stickiness with load-balancer generated cookie
             ApplicationTargetGroup tg1 = new ApplicationTargetGroup(this, "WebTG1", new ApplicationTargetGroupProps {
@@ -223,7 +225,7 @@ namespace Octankwebapp
                 }),
                 Role = webInstanceRole,
                 SecurityGroup = appInstanceSG,
-                MinCapacity = 1,
+                MinCapacity = 2,
                 MaxCapacity = 4,
                 KeyName = "tmpInstanceKey"
             });
