@@ -226,7 +226,7 @@ namespace Octankwebapp
                 Role = webInstanceRole,
                 SecurityGroup = appInstanceSG,
                 MinCapacity = 2,
-                MaxCapacity = 4,
+                MaxCapacity = 8,
                 KeyName = "tmpInstanceKey"
             });
                         
