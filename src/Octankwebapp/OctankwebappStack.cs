@@ -97,21 +97,11 @@ namespace Octankwebapp
                 MaxCapacity = 8                
             });
 
-            // //Create a new CloudWatch Metric
-            // Metric networkTraffic = new Metric(new MetricProps{
-            //     Namespace = "AWS/ApplicationELB",
-            //     MetricName = "NewConnectionCount",
-            //     DimensionsMap = new Dictionary<string, string> {
-            //         { "LoadBalancer", lb.LoadBalancerName}
-            //     },
-            //     Period = Duration.Seconds(60)
-            // });
-
             //Add Scaling policy based on Metric
             //Create a new StepScalingPolicy            
             asg.ScaleOnMetric("ScaleToALBConnections", new BasicStepScalingPolicyProps{
                 Metric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) }),
-                ScalingSteps = new [] { new ScalingInterval { Upper = 10, Change = -1 }, new ScalingInterval {Lower = 50, Change = +2}, new ScalingInterval { Lower = 100, Change = +3 }},
+                ScalingSteps = new [] { new ScalingInterval { Upper = 2, Change = -1 }, new ScalingInterval {Lower = 50, Change = +2}, new ScalingInterval { Lower = 100, Change = +3 }},
                 AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY
             });
 
@@ -150,12 +140,6 @@ namespace Octankwebapp
 
             });
             
-
-            //Console.WriteLine("[{0}]", string.Join(", ", userdata));
-
-            //{"sudo yum update -y", "sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2", "cat /etc/system-release", "sudo yum install -y httpd", "sudo systemctl start httpd" ,"sudo systemctl enable httpd", "sudo touch /var/www/html/index.html"};
-            //asg.AddUserData(userdata);
-
             //Create Elasticache Security group
             SecurityGroup redissecGroup = new SecurityGroup(this, "redissecuritygroup", new SecurityGroupProps{
                 Vpc = baseNetwork.abVpc
