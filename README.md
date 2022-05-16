@@ -31,7 +31,8 @@ It uses the [.NET Core CLI](https://docs.microsoft.com/dotnet/articles/core/) to
 1. Delete memcached cluster
 2. Disassociate and delete WAF 
 3. Remove Autoscaling Policies from ASG
-4. Delete CF Stack
-5. Delete App Pipeline
+4. Delete ASG if you have used B/G deployments
+5. Delete CF Stack
+6. Delete App Pipeline
 
 
