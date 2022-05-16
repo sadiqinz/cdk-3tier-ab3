@@ -85,25 +85,26 @@ namespace Octankwebapp
                 KeyName = "tmpInstanceKey"
             });
 
-            //Create an AutoScalingGroup
-            AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "ExtAsg", new AutoScalingGroupProps{
-                Cooldown = Duration.Seconds(20),
-                Vpc = baseNetwork.abVpc,
-                LaunchTemplate = webservertemplate,
-                VpcSubnets = new SubnetSelection {
-                    SubnetGroupName = "webtier"
-                },                
-                MinCapacity = 2,
-                MaxCapacity = 6                
-            });
+            // //Create an AutoScalingGroup
+            // AutoScalingGroup asg = new Amazon.CDK.AWS.AutoScaling.AutoScalingGroup(this, "ExtAsg", new AutoScalingGroupProps{
+            //     Cooldown = Duration.Seconds(20),
+            //     Vpc = baseNetwork.abVpc,
+            //     LaunchTemplate = webservertemplate,
+            //     VpcSubnets = new SubnetSelection {
+            //         SubnetGroupName = "webtier"
+            //     },                
+            //     MinCapacity = 2,
+            //     MaxCapacity = 6                
+            // });
 
             //Add Scaling policy based on Metric
-            //Create a new StepScalingPolicy            
-            asg.ScaleOnMetric("ScaleToALBConnections", new BasicStepScalingPolicyProps{
-                Metric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) }),
-                ScalingSteps = new [] { new ScalingInterval { Upper = 40, Change = -1 }, new ScalingInterval {Lower = 50, Change = +2}, new ScalingInterval { Lower = 100, Change = +3 }},
-                AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY
-            });
+            Metric lbMetric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) });
+            // //Create a new StepScalingPolicy            
+            // asg.ScaleOnMetric("ScaleToALBConnections", new BasicStepScalingPolicyProps{
+            //     Metric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) }),
+            //     ScalingSteps = new [] { new ScalingInterval { Upper = 40, Change = -1 }, new ScalingInterval {Lower = 50, Change = +2}, new ScalingInterval { Lower = 100, Change = +3 }},
+            //     AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY
+            // });
 
 
             // Target group with duration-based stickiness with load-balancer generated cookie
@@ -130,7 +131,7 @@ namespace Octankwebapp
             });
 
             //Attache ASG to load balancer
-            asg.AttachToApplicationTargetGroup(tg1);
+            //asg.AttachToApplicationTargetGroup(tg1);
 
             //Create a CloudFront Distribution and point to ALB
             new Distribution(this, "octankdistribution", new DistributionProps{
@@ -224,8 +225,6 @@ namespace Octankwebapp
             });
 
             
-            
-
             // Target group with duration-based stickiness with load-balancer generated cookie
             ApplicationTargetGroup inttg1 = new ApplicationTargetGroup(this, "AppTG1", new ApplicationTargetGroupProps {
                 TargetType = TargetType.INSTANCE,
