@@ -97,8 +97,21 @@ namespace Octankwebapp
             //     MaxCapacity = 6                
             // });
 
-            //Add Scaling policy based on Metric
-            Metric lbMetric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) });
+            //Add Scaling policy based on Metric            
+            var webasgScaleout = new Alarm(this, "WebASGAlarm-Scaleout", new AlarmProps{
+                Metric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) }),
+                Threshold = 50, 
+                EvaluationPeriods = 1,
+                DatapointsToAlarm = 1
+            });
+            //Scale In Alarm
+            var webasgScalein = new Alarm(this, "WebASGAlarm-Scalein", new AlarmProps{
+                Metric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) }),
+                Threshold = 10, 
+                EvaluationPeriods = 1,
+                DatapointsToAlarm = 1
+            });
+
             // //Create a new StepScalingPolicy            
             // asg.ScaleOnMetric("ScaleToALBConnections", new BasicStepScalingPolicyProps{
             //     Metric = lb.MetricActiveConnectionCount(new MetricOptions { Period = Duration.Minutes(1) }),
