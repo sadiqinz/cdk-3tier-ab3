@@ -94,7 +94,7 @@ namespace Octankwebapp
                     SubnetGroupName = "webtier"
                 },                
                 MinCapacity = 2,
-                MaxCapacity = 8                
+                MaxCapacity = 6                
             });
 
             //Add Scaling policy based on Metric
@@ -210,7 +210,7 @@ namespace Octankwebapp
                 Role = webInstanceRole,
                 SecurityGroup = appInstanceSG,
                 MinCapacity = 2,
-                MaxCapacity = 8,
+                MaxCapacity = 6,
                 KeyName = "tmpInstanceKey"
             });
                         
