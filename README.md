@@ -27,3 +27,11 @@ It uses the [.NET Core CLI](https://docs.microsoft.com/dotnet/articles/core/) to
 1. Refresh to choose the correct ASB
 2. Re-Create ASG after Code Deploy has been created
 
+# Steps for Deleting
+1. Delete memcached cluster
+2. Disassociate and delete WAF 
+3. Remove Autoscaling Policies from ASG
+4. Delete CF Stack
+5. Delete App Pipeline
+
+
